@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import type { GameState } from '../game/types'
 import { NextPiece } from './NextPiece'
+import { WordHistory } from './WordHistory'
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
@@ -34,6 +35,7 @@ export function Sidebar({ state, children }: { state: GameState; children?: Reac
         <Stat label="Level" value={state.level} />
         <Stat label="Words" value={state.words} />
       </div>
+      <WordHistory words={state.wordHistory} />
       {children}
     </aside>
   )

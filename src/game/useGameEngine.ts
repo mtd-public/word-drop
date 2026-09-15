@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import {
-  ageRedCells,
+  ageCells,
   createEmptyGrid,
-  findExpiredRedCells,
+  findExpiredCells,
   isValidPosition,
   mergePiece,
   resolveRemovals,
@@ -42,6 +42,7 @@ function initialState(): GameState {
     words: 0,
     phase: 'ready',
     wordMatches: [],
+    wordHistory: [],
     destructingCells: [],
     dropIntervalMs: dropIntervalForLevel(1),
   }
@@ -78,8 +79,8 @@ function lockActivePiece(state: GameState): GameState {
       ([dr, dc]) => `${state.active.row + dr}-${state.active.col + dc}`,
     ),
   )
-  const aged = ageRedCells(merged, justPlaced)
-  const expiredCells = findExpiredRedCells(aged)
+  const aged = ageCells(merged, justPlaced)
+  const expiredCells = findExpiredCells(aged)
   const wordMatches = findWordMatches(aged)
 
   if (expiredCells.length > 0 || wordMatches.length > 0) {
@@ -87,11 +88,13 @@ function lockActivePiece(state: GameState): GameState {
     // is purely visual, not a gate on when points land.
     const words = state.words + wordMatches.length
     const level = levelForWords(words)
-    const scoreGain = wordMatches.reduce((sum, m) => sum + pointsForWord(m.word, state.level), 0)
+    const found = wordMatches.map((m) => ({ word: m.word, points: pointsForWord(m.word, state.level) }))
+    const scoreGain = found.reduce((sum, f) => sum + f.points, 0)
     return {
       ...state,
       grid: aged,
       wordMatches,
+      wordHistory: [...found.reverse(), ...state.wordHistory],
       destructingCells: expiredCells,
       phase: 'clearing',
       words,

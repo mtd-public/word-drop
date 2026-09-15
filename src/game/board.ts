@@ -1,5 +1,5 @@
 import { cellsFor, coloredCellsFor } from './pieces'
-import { BOARD_COLS, BOARD_ROWS, RED_LIFESPAN } from './types'
+import { BOARD_COLS, BOARD_ROWS, LIFESPAN_BY_COLOR } from './types'
 import type { ActivePiece, Cell, Grid } from './types'
 
 export function createEmptyGrid(): Grid {
@@ -23,27 +23,27 @@ export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
     const row = piece.row + dr
     const col = piece.col + dc
     if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-      next[row][col] = { color, age: color === 'red' ? RED_LIFESPAN : 0, letter: piece.letters[i] }
+      next[row][col] = { color, age: LIFESPAN_BY_COLOR[color], letter: piece.letters[i] }
     }
   })
   return next
 }
 
-/** Ages every placed red cell by one turn, except cells at `skip` coordinates (just placed). */
-export function ageRedCells(grid: Grid, skip: Set<string>): Grid {
+/** Ages every placed cell by one turn, except cells at `skip` coordinates (just placed). */
+export function ageCells(grid: Grid, skip: Set<string>): Grid {
   return grid.map((row, r) =>
     row.map((cell, c) => {
-      if (!cell || cell.color !== 'red' || skip.has(`${r}-${c}`)) return cell
+      if (!cell || skip.has(`${r}-${c}`)) return cell
       return { ...cell, age: cell.age - 1 }
     }),
   )
 }
 
-export function findExpiredRedCells(grid: Grid): Array<[number, number]> {
+export function findExpiredCells(grid: Grid): Array<[number, number]> {
   const cells: Array<[number, number]> = []
   grid.forEach((row, r) => {
     row.forEach((cell, c) => {
-      if (cell && cell.color === 'red' && cell.age <= 0) cells.push([r, c])
+      if (cell && cell.age <= 0) cells.push([r, c])
     })
   })
   return cells
