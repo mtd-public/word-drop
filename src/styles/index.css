@@ -187,6 +187,8 @@ button {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(20, 22, 30, 0.05), 0 12px 32px -12px rgba(20, 22, 30, 0.25);
+  /* Swipes drive movement here — don't let the browser scroll/zoom on them. */
+  touch-action: none;
 }
 
 .board {
@@ -239,29 +241,50 @@ button {
   pointer-events: none;
 }
 
-/* ---------- Sidebar (tablet-landscape / desktop) ---------- */
-.sidebar {
-  display: none;
-  width: 220px;
+/* ---------- Side panels: stats (+ next piece) and words, always two
+   separate cards. Row-compact on phone/tablet, a stacked column on desktop. ---------- */
+.side-panels {
+  display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
+  width: 100%;
+}
+
+.stats-sidebar,
+.words-sidebar {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 20px;
-  align-self: stretch;
+  padding: 14px;
 }
 
-.sidebar__section {
+.stats-sidebar {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
 }
 
-.sidebar__stats {
+.stats-sidebar__section {
+  flex: none;
+  width: 64px;
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.stats-sidebar__stats {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 14px;
+}
+
+.words-sidebar {
+  height: 160px;
+  display: flex;
+  flex-direction: column;
 }
 
 .stat {
@@ -357,19 +380,12 @@ button {
   box-shadow: inset 0 0 0 1.5px rgba(20, 22, 30, 0.12);
 }
 
-/* ---------- Controls ---------- */
+/* ---------- Controls ----------
+   Desktop-only: mobile/tablet move left/right/drop to swipe gestures on the
+   board and keep only the rotate button, in the footer bar below. */
 .controls {
-  display: flex;
+  display: none;
   gap: 10px;
-}
-
-.controls--row {
-  flex-direction: row;
-}
-
-.controls--column {
-  flex-direction: column;
-  margin-top: auto;
 }
 
 .btn {
@@ -426,10 +442,20 @@ button {
   filter: brightness(1.06);
 }
 
-.bottom-bar {
+.footer-bar {
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   background: var(--panel);
   border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+}
+
+.btn--footer-rotate {
+  flex: none;
+  min-width: 180px;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 28px;
 }
 
 /* ---------- Word toast ---------- */
@@ -494,8 +520,11 @@ button {
   font-size: 14px;
 }
 
-/* ---------- Wide layout: tablet-landscape & desktop ---------- */
-@media (min-width: 880px) {
+/* ---------- Desktop (mouse/trackpad) layout ----------
+   Deliberately gated on pointer:fine rather than width alone: a touch
+   tablet in landscape can easily be wider than 880px, but it should still
+   get the swipe + footer-rotate layout below, not mouse-oriented sidebars. */
+@media (pointer: fine) and (min-width: 880px) {
   .layout {
     flex-direction: row;
     align-items: stretch;
@@ -504,13 +533,39 @@ button {
 
   .board-shell {
     height: min(78dvh, 720px);
+    order: 1;
   }
 
-  .sidebar {
+  .side-panels {
+    order: 2;
+    width: 220px;
+    align-self: stretch;
+  }
+
+  .stats-sidebar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats-sidebar__section {
+    width: auto;
+  }
+
+  .stats-sidebar__stats {
+    flex-direction: column;
+  }
+
+  .words-sidebar {
+    height: auto;
+    flex: 1;
+  }
+
+  .controls {
     display: flex;
+    flex-direction: column;
   }
 
-  .bottom-bar {
+  .footer-bar {
     display: none;
   }
 }

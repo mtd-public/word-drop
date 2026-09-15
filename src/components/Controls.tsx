@@ -1,14 +1,13 @@
 interface ControlsProps {
-  orientation: 'row' | 'column'
   onLeft: () => void
   onRotate: () => void
   onRight: () => void
   disabled?: boolean
 }
 
-export function Controls({ orientation, onLeft, onRotate, onRight, disabled }: ControlsProps) {
+export function Controls({ onLeft, onRotate, onRight, disabled }: ControlsProps) {
   return (
-    <div className={`controls controls--${orientation}`}>
+    <div className="controls">
       <button type="button" className="btn" onClick={onLeft} disabled={disabled} aria-label="Move left">
         ◀
       </button>
