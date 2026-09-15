@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { cellsFor, splitColorMap } from '../game/pieces'
+import { coloredCellsFor } from '../game/pieces'
 import { BOARD_COLS, BOARD_ROWS } from '../game/types'
 import type { GameState, PieceColor } from '../game/types'
 import { Cell } from './Cell'
@@ -20,12 +20,11 @@ function buildDisplayGrid(state: GameState): DisplayCell[][] {
   )
 
   if (state.phase === 'playing' || state.phase === 'paused') {
-    const colors = splitColorMap(state.active.type, state.active.rotation)
-    for (const [dr, dc] of cellsFor(state.active.type, state.active.rotation)) {
+    for (const { offset: [dr, dc], color } of coloredCellsFor(state.active.type, state.active.rotation)) {
       const row = state.active.row + dr
       const col = state.active.col + dc
       if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-        grid[row][col] = { color: colors[`${dr}-${dc}`], active: true }
+        grid[row][col] = { color, active: true }
       }
     }
   }

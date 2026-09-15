@@ -1,11 +1,14 @@
-import { PIECE_COLOR_HEX, splitColorMap } from '../game/pieces'
-import type { QueueEntry } from '../game/types'
+import { coloredCellsFor, PIECE_COLOR_HEX } from '../game/pieces'
+import type { PieceColor, QueueEntry } from '../game/types'
 
 const PREVIEW_COLS = 4
 const PREVIEW_ROWS = 3
 
 export function NextPiece({ entry }: { entry: QueueEntry }) {
-  const colors = splitColorMap(entry.type, 0)
+  const colors: Record<string, PieceColor> = {}
+  for (const { offset: [r, c], color } of coloredCellsFor(entry.type, 0)) {
+    colors[`${r}-${c}`] = color
+  }
 
   const cells = []
   for (let r = 0; r < PREVIEW_ROWS; r++) {

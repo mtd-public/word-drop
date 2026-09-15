@@ -1,4 +1,4 @@
-import { cellsFor, splitColorMap } from './pieces'
+import { cellsFor, coloredCellsFor } from './pieces'
 import { BOARD_COLS, BOARD_ROWS, RED_LIFESPAN } from './types'
 import type { ActivePiece, Cell, FilledCell, Grid } from './types'
 
@@ -19,12 +19,10 @@ export function isValidPosition(grid: Grid, piece: ActivePiece): boolean {
 
 export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
   const next = grid.map((row) => [...row])
-  const colors = splitColorMap(piece.type, piece.rotation)
-  for (const [dr, dc] of cellsFor(piece.type, piece.rotation)) {
+  for (const { offset: [dr, dc], color } of coloredCellsFor(piece.type, piece.rotation)) {
     const row = piece.row + dr
     const col = piece.col + dc
     if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-      const color = colors[`${dr}-${dc}`]
       next[row][col] = { color, age: color === 'red' ? RED_LIFESPAN : 0 }
     }
   }
