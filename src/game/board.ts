@@ -19,7 +19,7 @@ export function isValidPosition(grid: Grid, piece: ActivePiece): boolean {
 
 export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
   const next = grid.map((row) => [...row])
-  const colors = splitColorMap(piece.type, piece.rotation, piece.split)
+  const colors = splitColorMap(piece.type, piece.rotation)
   for (const [dr, dc] of cellsFor(piece.type, piece.rotation)) {
     const row = piece.row + dr
     const col = piece.col + dc

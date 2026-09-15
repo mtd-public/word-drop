@@ -20,7 +20,7 @@ function buildDisplayGrid(state: GameState): DisplayCell[][] {
   )
 
   if (state.phase === 'playing' || state.phase === 'paused') {
-    const colors = splitColorMap(state.active.type, state.active.rotation, state.active.split)
+    const colors = splitColorMap(state.active.type, state.active.rotation)
     for (const [dr, dc] of cellsFor(state.active.type, state.active.rotation)) {
       const row = state.active.row + dr
       const col = state.active.col + dc

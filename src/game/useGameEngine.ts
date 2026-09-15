@@ -9,7 +9,7 @@ import {
   resolveRemovals,
   settleColumns,
 } from './board'
-import { cellsFor, randomSplit, shuffledBag } from './pieces'
+import { cellsFor, shuffledBag } from './pieces'
 import { dropIntervalForLevel, levelForLines, pointsForClear } from './scoring'
 import type { ActivePiece, GameState, QueueEntry } from './types'
 
@@ -19,13 +19,13 @@ const CLEAR_ANIMATION_MS = 380
 const WALL_KICKS = [0, -1, 1, -2, 2]
 
 function spawnPiece(entry: QueueEntry): ActivePiece {
-  return { type: entry.type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL, split: entry.split }
+  return { type: entry.type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL }
 }
 
 function makeQueue(existing: QueueEntry[]): QueueEntry[] {
   const queue = [...existing]
   while (queue.length < 8) {
-    queue.push(...shuffledBag().map((type) => ({ type, split: randomSplit() })))
+    queue.push(...shuffledBag().map((type) => ({ type })))
   }
   return queue
 }
