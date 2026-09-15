@@ -1,6 +1,6 @@
 import { cellsFor, coloredCellsFor } from './pieces'
 import { BOARD_COLS, BOARD_ROWS, RED_LIFESPAN } from './types'
-import type { ActivePiece, Cell, FilledCell, Grid } from './types'
+import type { ActivePiece, Cell, Grid } from './types'
 
 export function createEmptyGrid(): Grid {
   return Array.from({ length: BOARD_ROWS }, () => Array<null>(BOARD_COLS).fill(null))
@@ -19,13 +19,13 @@ export function isValidPosition(grid: Grid, piece: ActivePiece): boolean {
 
 export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
   const next = grid.map((row) => [...row])
-  for (const { offset: [dr, dc], color } of coloredCellsFor(piece.type, piece.rotation)) {
+  coloredCellsFor(piece.type, piece.rotation).forEach(({ offset: [dr, dc], color }, i) => {
     const row = piece.row + dr
     const col = piece.col + dc
     if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-      next[row][col] = { color, age: color === 'red' ? RED_LIFESPAN : 0 }
+      next[row][col] = { color, age: color === 'red' ? RED_LIFESPAN : 0, letter: piece.letters[i] }
     }
-  }
+  })
   return next
 }
 
@@ -49,14 +49,11 @@ export function findExpiredRedCells(grid: Grid): Array<[number, number]> {
   return cells
 }
 
-/** Only a full row where every cell is the same color is clearable. */
-export function findMonochromeFullRows(grid: Grid): number[] {
+/** A row clears purely by being full — shape only, regardless of block color. */
+export function findFullRows(grid: Grid): number[] {
   const rows: number[] = []
   grid.forEach((row, index) => {
-    const filled = row as FilledCell[]
-    if (filled.some((cell) => cell === null)) return
-    const first = filled[0].color
-    if (filled.every((cell) => cell.color === first)) rows.push(index)
+    if (row.every((cell) => cell !== null)) rows.push(index)
   })
   return rows
 }

@@ -3,13 +3,13 @@ import {
   ageRedCells,
   createEmptyGrid,
   findExpiredRedCells,
-  findMonochromeFullRows,
+  findFullRows,
   isValidPosition,
   mergePiece,
   resolveRemovals,
   settleColumns,
 } from './board'
-import { cellsFor, shuffledBag } from './pieces'
+import { cellsFor, randomLettersFor, shuffledBag } from './pieces'
 import { dropIntervalForLevel, levelForLines, pointsForClear } from './scoring'
 import type { ActivePiece, GameState, QueueEntry } from './types'
 
@@ -19,13 +19,13 @@ const CLEAR_ANIMATION_MS = 380
 const WALL_KICKS = [0, -1, 1, -2, 2]
 
 function spawnPiece(entry: QueueEntry): ActivePiece {
-  return { type: entry.type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL }
+  return { type: entry.type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL, letters: entry.letters }
 }
 
 function makeQueue(existing: QueueEntry[]): QueueEntry[] {
   const queue = [...existing]
   while (queue.length < 8) {
-    queue.push(...shuffledBag().map((type) => ({ type })))
+    queue.push(...shuffledBag().map((type) => ({ type, letters: randomLettersFor(type) })))
   }
   return queue
 }
@@ -80,7 +80,7 @@ function lockActivePiece(state: GameState): GameState {
   )
   const aged = ageRedCells(merged, justPlaced)
   const expiredCells = findExpiredRedCells(aged)
-  const clearableRows = findMonochromeFullRows(aged)
+  const clearableRows = findFullRows(aged)
 
   if (expiredCells.length > 0 || clearableRows.length > 0) {
     // Score counts the instant a match locks in — the flash/burst that follows

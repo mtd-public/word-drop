@@ -12,6 +12,8 @@ export interface FilledCell {
   color: PieceColor
   /** Turns remaining before self-destruct. Only meaningful for red cells. */
   age: number
+  /** A vowel for red cells, a consonant for blue cells. */
+  letter: string
 }
 
 export type Cell = FilledCell | null
@@ -19,6 +21,8 @@ export type Grid = Cell[][]
 
 export interface QueueEntry {
   type: PieceType
+  /** One random letter per block, indexed to match the piece's rigid color sequence. */
+  letters: string[]
 }
 
 export interface ActivePiece {
@@ -26,6 +30,7 @@ export interface ActivePiece {
   rotation: number
   row: number
   col: number
+  letters: string[]
 }
 
 export type GamePhase = 'ready' | 'playing' | 'paused' | 'clearing' | 'over'
