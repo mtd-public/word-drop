@@ -1,21 +1,23 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import { clearRows, createEmptyGrid, findFullRows, isValidPosition, mergePiece } from './board'
-import { shuffledBag } from './pieces'
+import { clearRows, createEmptyGrid, findMonochromeFullRows, isValidPosition, mergePiece } from './board'
+import { randomSplit, shuffledBag } from './pieces'
 import { dropIntervalForLevel, levelForLines, pointsForClear } from './scoring'
-import type { ActivePiece, GameState, PieceType } from './types'
+import type { ActivePiece, GameState, QueueEntry } from './types'
 
 const SPAWN_COL = 3
 const SPAWN_ROW = -1
 const CLEAR_ANIMATION_MS = 380
 const WALL_KICKS = [0, -1, 1, -2, 2]
 
-function spawnPiece(type: PieceType): ActivePiece {
-  return { type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL }
+function spawnPiece(entry: QueueEntry): ActivePiece {
+  return { type: entry.type, rotation: 0, row: SPAWN_ROW, col: SPAWN_COL, split: entry.split }
 }
 
-function makeQueue(existing: PieceType[]): PieceType[] {
+function makeQueue(existing: QueueEntry[]): QueueEntry[] {
   const queue = [...existing]
-  while (queue.length < 8) queue.push(...shuffledBag())
+  while (queue.length < 8) {
+    queue.push(...shuffledBag().map((type) => ({ type, split: randomSplit() })))
+  }
   return queue
 }
 
@@ -48,8 +50,8 @@ type Action =
 
 function trySpawnNext(state: GameState): GameState {
   const queue = makeQueue(state.nextQueue)
-  const [nextType, ...rest] = queue
-  const piece = spawnPiece(nextType)
+  const [nextEntry, ...rest] = queue
+  const piece = spawnPiece(nextEntry)
   const grid = state.grid
   if (!isValidPosition(grid, piece)) {
     return { ...state, active: piece, nextQueue: rest, phase: 'over' }
@@ -59,9 +61,9 @@ function trySpawnNext(state: GameState): GameState {
 
 function lockActivePiece(state: GameState): GameState {
   const merged = mergePiece(state.grid, state.active)
-  const fullRows = findFullRows(merged)
-  if (fullRows.length > 0) {
-    return { ...state, grid: merged, clearingRows: fullRows, phase: 'clearing' }
+  const clearableRows = findMonochromeFullRows(merged)
+  if (clearableRows.length > 0) {
+    return { ...state, grid: merged, clearingRows: clearableRows, phase: 'clearing' }
   }
   return trySpawnNext({ ...state, grid: merged })
 }

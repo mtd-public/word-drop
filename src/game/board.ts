@@ -1,4 +1,4 @@
-import { cellsFor } from './pieces'
+import { cellsFor, splitColorMap } from './pieces'
 import { BOARD_COLS, BOARD_ROWS } from './types'
 import type { ActivePiece, Grid } from './types'
 
@@ -19,20 +19,24 @@ export function isValidPosition(grid: Grid, piece: ActivePiece): boolean {
 
 export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
   const next = grid.map((row) => [...row])
+  const colors = splitColorMap(piece.type, piece.rotation, piece.split)
   for (const [dr, dc] of cellsFor(piece.type, piece.rotation)) {
     const row = piece.row + dr
     const col = piece.col + dc
     if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-      next[row][col] = piece.type
+      next[row][col] = colors[`${dr}-${dc}`]
     }
   }
   return next
 }
 
-export function findFullRows(grid: Grid): number[] {
+/** Only a full row where every cell is the same color is clearable. */
+export function findMonochromeFullRows(grid: Grid): number[] {
   const rows: number[] = []
   grid.forEach((row, index) => {
-    if (row.every((cell) => cell !== null)) rows.push(index)
+    const full = row.every((cell) => cell !== null)
+    const monochrome = full && row.every((cell) => cell === row[0])
+    if (full && monochrome) rows.push(index)
   })
   return rows
 }
