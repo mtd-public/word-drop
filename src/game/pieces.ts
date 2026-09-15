@@ -1,4 +1,4 @@
-import type { PieceColor, PieceType, SplitStyle } from './types'
+import type { PieceColor, PieceType } from './types'
 
 // Each rotation is a list of [row, col] offsets within the piece's bounding box.
 export const SHAPES: Record<PieceType, Array<Array<[number, number]>>> = {
@@ -19,12 +19,6 @@ export const SHAPES: Record<PieceType, Array<Array<[number, number]>>> = {
     [[0, 1], [1, 1], [1, 2], [2, 1]],
     [[1, 0], [1, 1], [1, 2], [2, 1]],
     [[0, 1], [1, 0], [1, 1], [2, 1]],
-  ],
-  S: [
-    [[0, 1], [0, 2], [1, 0], [1, 1]],
-    [[0, 1], [1, 1], [1, 2], [2, 2]],
-    [[1, 1], [1, 2], [2, 0], [2, 1]],
-    [[0, 0], [1, 0], [1, 1], [2, 1]],
   ],
   Z: [
     [[0, 0], [0, 1], [1, 1], [1, 2]],
@@ -51,9 +45,9 @@ export const PIECE_COLOR_HEX: Record<PieceColor, string> = {
   blue: '#3e6fd8',
 }
 
-export const PIECE_TYPES: PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L']
+export const PIECE_TYPES: PieceType[] = ['I', 'O', 'T', 'Z', 'J', 'L']
 
-/** Fisher-Yates shuffle of a fresh 7-bag, so every piece appears once per 7. */
+/** Fisher-Yates shuffle of a fresh bag, so every piece appears once per cycle. */
 export function shuffledBag(): PieceType[] {
   const bag = [...PIECE_TYPES]
   for (let i = bag.length - 1; i > 0; i--) {
@@ -63,30 +57,18 @@ export function shuffledBag(): PieceType[] {
   return bag
 }
 
-export function randomSplit(): SplitStyle {
-  return Math.random() < 0.5 ? 'LR' : 'TB'
-}
-
 export function cellsFor(type: PieceType, rotation: number): Array<[number, number]> {
   return SHAPES[type][rotation % 4]
 }
 
 /**
- * Colors a piece's own cells red/blue by sorting them along the split axis
- * (columns for LR, rows for TB) and taking the first two as red, last two as
- * blue — always an exact 2/2 split, recomputed fresh for the current rotation.
+ * Colors a piece's own cells red/blue by sorting them left-to-right and
+ * taking the first two as red, last two as blue — always an exact 2/2
+ * split, recomputed fresh for the current rotation.
  */
-export function splitColorMap(
-  type: PieceType,
-  rotation: number,
-  split: SplitStyle,
-): Record<string, PieceColor> {
+export function splitColorMap(type: PieceType, rotation: number): Record<string, PieceColor> {
   const cells = cellsFor(type, rotation)
-  const sorted = [...cells].sort(([ar, ac], [br, bc]) => {
-    const primary = split === 'LR' ? ac - bc : ar - br
-    if (primary !== 0) return primary
-    return split === 'LR' ? ar - br : ac - bc
-  })
+  const sorted = [...cells].sort(([ar, ac], [br, bc]) => ac - bc || ar - br)
 
   const map: Record<string, PieceColor> = {}
   sorted.forEach(([r, c], index) => {

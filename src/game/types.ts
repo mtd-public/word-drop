@@ -1,7 +1,5 @@
-export type PieceType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L'
+export type PieceType = 'I' | 'O' | 'T' | 'Z' | 'J' | 'L'
 
-/** LR splits a piece left/right (red | blue); TB splits it top/bottom. */
-export type SplitStyle = 'LR' | 'TB'
 export type PieceColor = 'red' | 'blue'
 
 export const BOARD_COLS = 10
@@ -21,7 +19,6 @@ export type Grid = Cell[][]
 
 export interface QueueEntry {
   type: PieceType
-  split: SplitStyle
 }
 
 export interface ActivePiece {
@@ -29,7 +26,6 @@ export interface ActivePiece {
   rotation: number
   row: number
   col: number
-  split: SplitStyle
 }
 
 export type GamePhase = 'ready' | 'playing' | 'paused' | 'clearing' | 'over'

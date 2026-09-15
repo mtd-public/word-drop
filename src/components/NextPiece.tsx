@@ -5,7 +5,7 @@ const PREVIEW_COLS = 4
 const PREVIEW_ROWS = 3
 
 export function NextPiece({ entry }: { entry: QueueEntry }) {
-  const colors = splitColorMap(entry.type, 0, entry.split)
+  const colors = splitColorMap(entry.type, 0)
 
   const cells = []
   for (let r = 0; r < PREVIEW_ROWS; r++) {
