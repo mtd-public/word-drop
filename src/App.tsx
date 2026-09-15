@@ -1,8 +1,9 @@
+import { useRef, useState } from 'react'
 import { Board } from './components/Board'
-import { Controls } from './components/Controls'
 import { GameOverlay } from './components/GameOverlay'
 import { KeyboardHelp } from './components/KeyboardHelp'
 import { StatsSidebar } from './components/StatsSidebar'
+import { WordsModal } from './components/WordsModal'
 import { WordToast } from './components/WordToast'
 import { WordsSidebar } from './components/WordsSidebar'
 import { useGameEngine } from './game/useGameEngine'
@@ -13,6 +14,25 @@ export default function App() {
   const playable = state.phase === 'playing'
   const swipeHandlers = useSwipeControls({ onSwipeLeft: moveLeft, onSwipeRight: moveRight, onSwipeDown: hardDrop })
 
+  const [wordsOpen, setWordsOpen] = useState(false)
+  const autoPausedRef = useRef(false)
+
+  function openWords() {
+    if (state.phase === 'playing') {
+      togglePause()
+      autoPausedRef.current = true
+    }
+    setWordsOpen(true)
+  }
+
+  function closeWords() {
+    setWordsOpen(false)
+    if (autoPausedRef.current) {
+      togglePause()
+      autoPausedRef.current = false
+    }
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -21,9 +41,9 @@ export default function App() {
           <span className="topbar__stat">
             <span className="stat__label">Score</span> {state.score.toLocaleString()}
           </span>
-          <span className="topbar__stat">
+          <button type="button" className="topbar__words-btn" onClick={openWords}>
             <span className="stat__label">Words</span> {state.words}
-          </span>
+          </button>
         </div>
         <div className="topbar__actions">
           <KeyboardHelp />
@@ -40,9 +60,7 @@ export default function App() {
 
       <main className="layout">
         <div className="side-panels">
-          <StatsSidebar state={state}>
-            <Controls onLeft={moveLeft} onRotate={rotate} onRight={moveRight} disabled={!playable} />
-          </StatsSidebar>
+          <StatsSidebar state={state} />
           <WordsSidebar words={state.wordHistory} />
         </div>
 
@@ -60,6 +78,9 @@ export default function App() {
       </main>
 
       <div className="footer-bar">
+        <button type="button" className="btn btn--footer-side" onClick={moveLeft} disabled={!playable} aria-label="Move left">
+          ◀
+        </button>
         <button
           type="button"
           className="btn btn--rotate btn--footer-rotate"
@@ -69,7 +90,12 @@ export default function App() {
         >
           ↻ Rotate
         </button>
+        <button type="button" className="btn btn--footer-side" onClick={moveRight} disabled={!playable} aria-label="Move right">
+          ▶
+        </button>
       </div>
+
+      <WordsModal open={wordsOpen} onClose={closeWords} words={state.wordHistory} />
     </div>
   )
 }

@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion'
-import type { ReactNode } from 'react'
 import type { GameState } from '../game/types'
 import { NextPiece } from './NextPiece'
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, duplicate }: { label: string; value: number; duplicate?: boolean }) {
   return (
-    <div className="stat">
+    <div className={`stat${duplicate ? ' stat--duplicate' : ''}`}>
       <span className="stat__label">{label}</span>
       <motion.span
         key={value}
@@ -20,7 +19,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   )
 }
 
-export function StatsSidebar({ state, children }: { state: GameState; children?: ReactNode }) {
+export function StatsSidebar({ state }: { state: GameState }) {
   const upcoming = state.nextQueue[0]
 
   return (
@@ -30,11 +29,13 @@ export function StatsSidebar({ state, children }: { state: GameState; children?:
         {upcoming && <NextPiece entry={upcoming} />}
       </div>
       <div className="stats-sidebar__stats">
-        <Stat label="Score" value={state.score} />
+        {/* Score and Words already show in the topbar — hidden here on the
+            compact phone/tablet-portrait strip, shown alongside Level on
+            the wide (desktop/tablet-landscape) card. */}
+        <Stat label="Score" value={state.score} duplicate />
         <Stat label="Level" value={state.level} />
-        <Stat label="Words" value={state.words} />
+        <Stat label="Words" value={state.words} duplicate />
       </div>
-      {children}
     </aside>
   )
 }
