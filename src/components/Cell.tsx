@@ -1,20 +1,20 @@
 import { motion } from 'framer-motion'
-import { PIECE_COLORS } from '../game/pieces'
-import type { PieceType } from '../game/types'
+import { PIECE_COLOR_HEX } from '../game/pieces'
+import type { PieceColor } from '../game/types'
 
 interface CellProps {
-  type: PieceType | null
+  color: PieceColor | null
   active?: boolean
   clearing?: boolean
 }
 
-export function Cell({ type, active, clearing }: CellProps) {
-  if (!type) return <div className="cell" />
+export function Cell({ color, active, clearing }: CellProps) {
+  if (!color) return <div className="cell" />
 
   return (
     <motion.div
       className={`cell cell--filled${active ? ' cell--active' : ''}`}
-      style={{ background: PIECE_COLORS[type] }}
+      style={{ background: PIECE_COLOR_HEX[color] }}
       initial={active ? { opacity: 0, scale: 0.6 } : false}
       animate={
         clearing

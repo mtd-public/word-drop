@@ -27,7 +27,7 @@ export function Sidebar({ state, children }: { state: GameState; children?: Reac
     <aside className="sidebar">
       <div className="sidebar__section">
         <span className="stat__label">Next</span>
-        {upcoming && <NextPiece type={upcoming} />}
+        {upcoming && <NextPiece entry={upcoming} />}
       </div>
       <div className="sidebar__stats">
         <Stat label="Score" value={state.score} />

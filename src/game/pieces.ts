@@ -1,4 +1,4 @@
-import type { PieceType } from './types'
+import type { PieceColor, PieceType, SplitStyle } from './types'
 
 // Each rotation is a list of [row, col] offsets within the piece's bounding box.
 export const SHAPES: Record<PieceType, Array<Array<[number, number]>>> = {
@@ -46,14 +46,9 @@ export const SHAPES: Record<PieceType, Array<Array<[number, number]>>> = {
   ],
 }
 
-export const PIECE_COLORS: Record<PieceType, string> = {
-  I: '#4fb8cf',
-  O: '#f0b93f',
-  T: '#a374cf',
-  S: '#5cb96e',
-  Z: '#e3546b',
-  J: '#5477d6',
-  L: '#e08a45',
+export const PIECE_COLOR_HEX: Record<PieceColor, string> = {
+  red: '#dd4b3e',
+  blue: '#3e6fd8',
 }
 
 export const PIECE_TYPES: PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L']
@@ -68,6 +63,34 @@ export function shuffledBag(): PieceType[] {
   return bag
 }
 
+export function randomSplit(): SplitStyle {
+  return Math.random() < 0.5 ? 'LR' : 'TB'
+}
+
 export function cellsFor(type: PieceType, rotation: number): Array<[number, number]> {
   return SHAPES[type][rotation % 4]
+}
+
+/**
+ * Colors a piece's own cells red/blue by sorting them along the split axis
+ * (columns for LR, rows for TB) and taking the first two as red, last two as
+ * blue — always an exact 2/2 split, recomputed fresh for the current rotation.
+ */
+export function splitColorMap(
+  type: PieceType,
+  rotation: number,
+  split: SplitStyle,
+): Record<string, PieceColor> {
+  const cells = cellsFor(type, rotation)
+  const sorted = [...cells].sort(([ar, ac], [br, bc]) => {
+    const primary = split === 'LR' ? ac - bc : ar - br
+    if (primary !== 0) return primary
+    return split === 'LR' ? ar - br : ac - bc
+  })
+
+  const map: Record<string, PieceColor> = {}
+  sorted.forEach(([r, c], index) => {
+    map[`${r}-${c}`] = index < 2 ? 'red' : 'blue'
+  })
+  return map
 }
