@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import { clearRows, createEmptyGrid, findMonochromeFullRows, isValidPosition, mergePiece } from './board'
-import { randomSplit, shuffledBag } from './pieces'
+import {
+  ageRedCells,
+  createEmptyGrid,
+  findExpiredRedCells,
+  findMonochromeFullRows,
+  isValidPosition,
+  mergePiece,
+  resolveRemovals,
+  settleColumns,
+} from './board'
+import { cellsFor, randomSplit, shuffledBag } from './pieces'
 import { dropIntervalForLevel, levelForLines, pointsForClear } from './scoring'
 import type { ActivePiece, GameState, QueueEntry } from './types'
 
@@ -33,6 +42,7 @@ function initialState(): GameState {
     lines: 0,
     phase: 'ready',
     clearingRows: [],
+    destructingCells: [],
     dropIntervalMs: dropIntervalForLevel(1),
   }
 }
@@ -61,11 +71,23 @@ function trySpawnNext(state: GameState): GameState {
 
 function lockActivePiece(state: GameState): GameState {
   const merged = mergePiece(state.grid, state.active)
-  const clearableRows = findMonochromeFullRows(merged)
-  if (clearableRows.length > 0) {
-    return { ...state, grid: merged, clearingRows: clearableRows, phase: 'clearing' }
+
+  // The cells this piece just placed are exempt from aging this turn.
+  const justPlaced = new Set(
+    cellsFor(state.active.type, state.active.rotation).map(
+      ([dr, dc]) => `${state.active.row + dr}-${state.active.col + dc}`,
+    ),
+  )
+  const aged = ageRedCells(merged, justPlaced)
+  const expiredCells = findExpiredRedCells(aged)
+  const clearableRows = findMonochromeFullRows(aged)
+
+  if (expiredCells.length > 0 || clearableRows.length > 0) {
+    return { ...state, grid: aged, clearingRows: clearableRows, destructingCells: expiredCells, phase: 'clearing' }
   }
-  return trySpawnNext({ ...state, grid: merged })
+
+  // Nothing to clear or destruct — but pieces can still overhang gaps, so settle now.
+  return trySpawnNext({ ...state, grid: settleColumns(aged) })
 }
 
 function reducer(state: GameState, action: Action): GameState {
@@ -118,7 +140,7 @@ function reducer(state: GameState, action: Action): GameState {
     case 'RESOLVE_CLEAR': {
       if (state.phase !== 'clearing') return state
       const clearedCount = state.clearingRows.length
-      const grid = clearRows(state.grid, state.clearingRows)
+      const grid = resolveRemovals(state.grid, state.clearingRows, state.destructingCells)
       const lines = state.lines + clearedCount
       const level = levelForLines(lines)
       const score = state.score + pointsForClear(clearedCount, state.level)
@@ -129,6 +151,7 @@ function reducer(state: GameState, action: Action): GameState {
         level,
         score,
         clearingRows: [],
+        destructingCells: [],
         dropIntervalMs: dropIntervalForLevel(level),
       })
       return next
