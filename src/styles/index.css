@@ -447,15 +447,21 @@ button {
   background: var(--panel);
   border-top: 1px solid var(--line);
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Left/right sit at the outer edges (thumb-reachable), swipe still works too. */
+.btn--footer-side {
+  flex: none;
+  width: 64px;
 }
 
 .btn--footer-rotate {
-  flex: none;
-  min-width: 180px;
+  flex: 1;
   font-size: 16px;
   font-weight: 700;
-  padding: 14px 28px;
+  padding: 14px 0;
 }
 
 /* ---------- Word toast ---------- */
@@ -567,5 +573,65 @@ button {
 
   .footer-bar {
     display: none;
+  }
+}
+
+/* ---------- Tablet landscape (touch) ----------
+   Fills the whole window (no page scroll): words on the left spanning the
+   full height, the board centered and stretched as large as that height
+   allows (its own aspect-ratio still keeps it a correct 10x20 board), and
+   the next/score card sized to its own content in the top right rather
+   than stretched down the whole column. Footer bar (with L/rotate/R) still
+   applies here same as any other touch device. */
+@media (pointer: coarse) and (orientation: landscape) and (min-width: 840px) {
+  .app {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: 1fr;
+    align-items: stretch;
+    justify-items: center;
+    gap: 16px;
+  }
+
+  .side-panels {
+    display: contents;
+  }
+
+  .words-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    height: auto;
+    justify-self: stretch;
+  }
+
+  .board-shell {
+    grid-column: 2;
+    grid-row: 1;
+    height: auto;
+    max-height: 900px;
+  }
+
+  .stats-sidebar {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    width: 100%;
+    justify-self: stretch;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats-sidebar__section {
+    width: auto;
+  }
+
+  .stats-sidebar__stats {
+    flex-direction: column;
   }
 }

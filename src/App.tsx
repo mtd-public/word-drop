@@ -60,6 +60,9 @@ export default function App() {
       </main>
 
       <div className="footer-bar">
+        <button type="button" className="btn btn--footer-side" onClick={moveLeft} disabled={!playable} aria-label="Move left">
+          ◀
+        </button>
         <button
           type="button"
           className="btn btn--rotate btn--footer-rotate"
@@ -68,6 +71,9 @@ export default function App() {
           aria-label="Rotate piece"
         >
           ↻ Rotate
+        </button>
+        <button type="button" className="btn btn--footer-side" onClick={moveRight} disabled={!playable} aria-label="Move right">
+          ▶
         </button>
       </div>
     </div>
