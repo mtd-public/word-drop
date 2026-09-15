@@ -2,13 +2,16 @@ import { Board } from './components/Board'
 import { Controls } from './components/Controls'
 import { GameOverlay } from './components/GameOverlay'
 import { KeyboardHelp } from './components/KeyboardHelp'
-import { Sidebar } from './components/Sidebar'
+import { StatsSidebar } from './components/StatsSidebar'
 import { WordToast } from './components/WordToast'
+import { WordsSidebar } from './components/WordsSidebar'
 import { useGameEngine } from './game/useGameEngine'
+import { useSwipeControls } from './hooks/useSwipeControls'
 
 export default function App() {
-  const { state, moveLeft, moveRight, rotate, start, togglePause, newGame } = useGameEngine()
+  const { state, moveLeft, moveRight, rotate, hardDrop, start, togglePause, newGame } = useGameEngine()
   const playable = state.phase === 'playing'
+  const swipeHandlers = useSwipeControls({ onSwipeLeft: moveLeft, onSwipeRight: moveRight, onSwipeDown: hardDrop })
 
   return (
     <div className="app">
@@ -36,7 +39,14 @@ export default function App() {
       </header>
 
       <main className="layout">
-        <div className="board-shell">
+        <div className="side-panels">
+          <StatsSidebar state={state}>
+            <Controls onLeft={moveLeft} onRotate={rotate} onRight={moveRight} disabled={!playable} />
+          </StatsSidebar>
+          <WordsSidebar words={state.wordHistory} />
+        </div>
+
+        <div className="board-shell" {...swipeHandlers}>
           <Board state={state} />
           <WordToast matches={state.phase === 'clearing' ? state.wordMatches : []} />
           <GameOverlay
@@ -47,14 +57,18 @@ export default function App() {
             onNewGame={newGame}
           />
         </div>
-
-        <Sidebar state={state}>
-          <Controls orientation="column" onLeft={moveLeft} onRotate={rotate} onRight={moveRight} disabled={!playable} />
-        </Sidebar>
       </main>
 
-      <div className="bottom-bar">
-        <Controls orientation="row" onLeft={moveLeft} onRotate={rotate} onRight={moveRight} disabled={!playable} />
+      <div className="footer-bar">
+        <button
+          type="button"
+          className="btn btn--rotate btn--footer-rotate"
+          onClick={rotate}
+          disabled={!playable}
+          aria-label="Rotate piece"
+        >
+          ↻ Rotate
+        </button>
       </div>
     </div>
   )
