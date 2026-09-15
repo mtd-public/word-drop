@@ -32,7 +32,7 @@ export function Sidebar({ state, children }: { state: GameState; children?: Reac
       <div className="sidebar__stats">
         <Stat label="Score" value={state.score} />
         <Stat label="Level" value={state.level} />
-        <Stat label="Lines" value={state.lines} />
+        <Stat label="Words" value={state.words} />
       </div>
       {children}
     </aside>

@@ -49,15 +49,6 @@ export function findExpiredRedCells(grid: Grid): Array<[number, number]> {
   return cells
 }
 
-/** A row clears purely by being full — shape only, regardless of block color. */
-export function findFullRows(grid: Grid): number[] {
-  const rows: number[] = []
-  grid.forEach((row, index) => {
-    if (row.every((cell) => cell !== null)) rows.push(index)
-  })
-  return rows
-}
-
 /** Drops every column's cells down to close any gaps, keeping their relative order. */
 export function settleColumns(grid: Grid): Grid {
   const settled = createEmptyGrid()
@@ -74,12 +65,9 @@ export function settleColumns(grid: Grid): Grid {
   return settled
 }
 
-/** Removes cleared rows and self-destructed cells, then lets everything above settle. */
-export function resolveRemovals(grid: Grid, rows: number[], cells: Array<[number, number]>): Grid {
+/** Removes matched-word and self-destructed cells, then lets everything above settle. */
+export function resolveRemovals(grid: Grid, cells: Array<[number, number]>): Grid {
   const next = grid.map((row) => [...row])
-  for (const row of rows) {
-    for (let c = 0; c < BOARD_COLS; c++) next[row][c] = null
-  }
   for (const [r, c] of cells) next[r][c] = null
   return settleColumns(next)
 }

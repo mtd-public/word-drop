@@ -383,6 +383,33 @@ button {
   border-top: 1px solid var(--line);
 }
 
+/* ---------- Word toast ---------- */
+.word-toast {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+.word-toast__pill {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px -4px rgba(20, 22, 30, 0.45);
+}
+
 /* ---------- Overlay ---------- */
 .overlay {
   position: absolute;

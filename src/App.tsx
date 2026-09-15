@@ -3,6 +3,7 @@ import { Controls } from './components/Controls'
 import { GameOverlay } from './components/GameOverlay'
 import { KeyboardHelp } from './components/KeyboardHelp'
 import { Sidebar } from './components/Sidebar'
+import { WordToast } from './components/WordToast'
 import { useGameEngine } from './game/useGameEngine'
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
             <span className="stat__label">Score</span> {state.score.toLocaleString()}
           </span>
           <span className="topbar__stat">
-            <span className="stat__label">Lines</span> {state.lines}
+            <span className="stat__label">Words</span> {state.words}
           </span>
         </div>
         <div className="topbar__actions">
@@ -37,6 +38,7 @@ export default function App() {
       <main className="layout">
         <div className="board-shell">
           <Board state={state} />
+          <WordToast matches={state.phase === 'clearing' ? state.wordMatches : []} />
           <GameOverlay
             phase={state.phase}
             score={state.score}

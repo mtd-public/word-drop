@@ -36,7 +36,10 @@ function buildDisplayGrid(state: GameState): DisplayCell[][] {
 
 export function Board({ state }: { state: GameState }) {
   const displayGrid = useMemo(() => buildDisplayGrid(state), [state])
-  const clearingSet = useMemo(() => new Set(state.clearingRows), [state.clearingRows])
+  const matchedSet = useMemo(
+    () => new Set(state.wordMatches.flatMap((m) => m.cells).map(([r, c]) => `${r}-${c}`)),
+    [state.wordMatches],
+  )
   const destructingSet = useMemo(
     () => new Set(state.destructingCells.map(([r, c]) => `${r}-${c}`)),
     [state.destructingCells],
@@ -50,7 +53,7 @@ export function Board({ state }: { state: GameState }) {
             key={`${r}-${c}`}
             color={cell.color}
             active={cell.active}
-            clearing={clearingSet.has(r)}
+            clearing={matchedSet.has(`${r}-${c}`)}
             bursting={destructingSet.has(`${r}-${c}`)}
             age={cell.age}
             letter={cell.letter}

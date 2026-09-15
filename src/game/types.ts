@@ -35,15 +35,20 @@ export interface ActivePiece {
 
 export type GamePhase = 'ready' | 'playing' | 'paused' | 'clearing' | 'over'
 
+export interface WordMatch {
+  word: string
+  cells: Array<[number, number]>
+}
+
 export interface GameState {
   grid: Grid
   active: ActivePiece
   nextQueue: QueueEntry[]
   score: number
   level: number
-  lines: number
+  words: number
   phase: GamePhase
-  clearingRows: number[]
+  wordMatches: WordMatch[]
   destructingCells: Array<[number, number]>
   dropIntervalMs: number
 }
