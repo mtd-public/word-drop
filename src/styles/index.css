@@ -37,7 +37,8 @@ button {
 }
 
 .app {
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -70,6 +71,30 @@ button {
 }
 
 .topbar__stat .stat__label {
+  margin-right: 4px;
+}
+
+.topbar__words-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.topbar__words-btn:hover {
+  background: rgba(232, 84, 63, 0.08);
+}
+
+.topbar__words-btn .stat__label {
+  color: var(--accent);
   margin-right: 4px;
 }
 
@@ -182,7 +207,9 @@ button {
 .board-shell {
   position: relative;
   aspect-ratio: 1 / 2;
-  height: min(64dvh, 640px);
+  flex: 1;
+  min-height: 0;
+  max-height: 640px;
   max-width: 94vw;
   border-radius: 12px;
   overflow: hidden;
@@ -281,9 +308,11 @@ button {
   gap: 14px;
 }
 
+/* Words found moves into a modal on phone/tablet-portrait (see App) —
+   this inline card only shows on the wide (desktop/tablet-landscape) layout. */
 .words-sidebar {
+  display: none;
   height: 160px;
-  display: flex;
   flex-direction: column;
 }
 
@@ -291,6 +320,11 @@ button {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* Score and Words already show in the topbar on the compact strip. */
+.stat--duplicate {
+  display: none;
 }
 
 .stat__label {
@@ -378,14 +412,6 @@ button {
 
 .next-cell--filled {
   box-shadow: inset 0 0 0 1.5px rgba(20, 22, 30, 0.12);
-}
-
-/* ---------- Controls ----------
-   Desktop-only: mobile/tablet move left/right/drop to swipe gestures on the
-   board and keep only the rotate button, in the footer bar below. */
-.controls {
-  display: none;
-  gap: 10px;
 }
 
 .btn {
@@ -526,69 +552,69 @@ button {
   font-size: 14px;
 }
 
-/* ---------- Desktop (mouse/trackpad) layout ----------
-   Deliberately gated on pointer:fine rather than width alone: a touch
-   tablet in landscape can easily be wider than 880px, but it should still
-   get the swipe + footer-rotate layout below, not mouse-oriented sidebars. */
-@media (pointer: fine) and (min-width: 880px) {
-  .layout {
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: center;
-  }
-
-  .board-shell {
-    height: min(78dvh, 720px);
-    order: 1;
-  }
-
-  .side-panels {
-    order: 2;
-    width: 220px;
-    align-self: stretch;
-  }
-
-  .stats-sidebar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .stats-sidebar__section {
-    width: auto;
-  }
-
-  .stats-sidebar__stats {
-    flex-direction: column;
-  }
-
-  .words-sidebar {
-    height: auto;
-    flex: 1;
-  }
-
-  .controls {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .footer-bar {
-    display: none;
-  }
+/* ---------- Words modal (phone / tablet-portrait) ---------- */
+.words-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 30, 0.55);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }
 
-/* ---------- Tablet landscape (touch) ----------
-   Fills the whole window (no page scroll): words on the left spanning the
-   full height, the board centered and stretched as large as that height
-   allows (its own aspect-ratio still keeps it a correct 10x20 board), and
-   the next/score card sized to its own content in the top right rather
-   than stretched down the whole column. Footer bar (with L/rotate/R) still
-   applies here same as any other touch device. */
-@media (pointer: coarse) and (orientation: landscape) and (min-width: 840px) {
-  .app {
-    height: 100dvh;
-    overflow: hidden;
-  }
+.words-modal-sheet {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 32px -12px rgba(20, 22, 30, 0.4);
+}
 
+.words-modal-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.words-modal-sheet__paused {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: rgba(232, 84, 63, 0.1);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.words-modal-sheet__close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+}
+
+/* ---------- Wide layout: desktop and tablet landscape ----------
+   Both get the identical three-column arrangement — words found full
+   height on the left, the board centered and as large as the window
+   allows, and the next/score/level/words card sized to its own content in
+   the top right rather than stretched down the column. Fills the window
+   exactly, no page scroll. Gated on pointer:fine for desktop, or
+   pointer:coarse + landscape for tablet — a touch tablet in landscape can
+   easily be wider than 880px, so width alone can't tell it apart from
+   desktop. Footer bar (L / rotate / R) stays visible here too, same as
+   every other layout — desktop keyboard and mouse both still work. */
+@media (pointer: fine) and (min-width: 880px), (pointer: coarse) and (orientation: landscape) and (min-width: 840px) {
   .layout {
     display: grid;
     grid-template-columns: 200px 1fr 200px;
@@ -603,6 +629,7 @@ button {
   }
 
   .words-sidebar {
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     width: 100%;
@@ -613,6 +640,7 @@ button {
   .board-shell {
     grid-column: 2;
     grid-row: 1;
+    flex: none;
     height: auto;
     max-height: 900px;
   }
@@ -633,5 +661,9 @@ button {
 
   .stats-sidebar__stats {
     flex-direction: column;
+  }
+
+  .stat--duplicate {
+    display: flex;
   }
 }
