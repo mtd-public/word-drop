@@ -51,6 +51,20 @@ export const PIECE_COLOR_HEX: Record<PieceColor, string> = {
 
 export const PIECE_TYPES: PieceType[] = ['I', 'O', 'T', 'Z', 'J', 'L']
 
+const VOWELS = ['A', 'E', 'I', 'O', 'U']
+const CONSONANTS = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z']
+
+/** Red blocks carry a vowel, blue blocks a consonant. */
+export function randomLetterFor(color: PieceColor): string {
+  const pool = color === 'red' ? VOWELS : CONSONANTS
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/** One random letter per block (matching each block's rigid color), for a fresh piece. */
+export function randomLettersFor(type: PieceType): string[] {
+  return pieceColorSequence(type).map(randomLetterFor)
+}
+
 /** Fisher-Yates shuffle of a fresh bag, so every piece appears once per cycle. */
 export function shuffledBag(): PieceType[] {
   const bag = [...PIECE_TYPES]

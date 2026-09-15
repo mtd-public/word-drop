@@ -8,6 +8,7 @@ interface DisplayCell {
   color: PieceColor | null
   active: boolean
   age?: number
+  letter?: string
 }
 
 function buildDisplayGrid(state: GameState): DisplayCell[][] {
@@ -16,17 +17,18 @@ function buildDisplayGrid(state: GameState): DisplayCell[][] {
       color: cell?.color ?? null,
       active: false,
       age: cell?.color === 'red' ? cell.age : undefined,
+      letter: cell?.letter,
     })),
   )
 
   if (state.phase === 'playing' || state.phase === 'paused') {
-    for (const { offset: [dr, dc], color } of coloredCellsFor(state.active.type, state.active.rotation)) {
+    coloredCellsFor(state.active.type, state.active.rotation).forEach(({ offset: [dr, dc], color }, i) => {
       const row = state.active.row + dr
       const col = state.active.col + dc
       if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-        grid[row][col] = { color, active: true }
+        grid[row][col] = { color, active: true, letter: state.active.letters[i] }
       }
-    }
+    })
   }
 
   return grid
@@ -51,6 +53,7 @@ export function Board({ state }: { state: GameState }) {
             clearing={clearingSet.has(r)}
             bursting={destructingSet.has(`${r}-${c}`)}
             age={cell.age}
+            letter={cell.letter}
           />
         )),
       )}

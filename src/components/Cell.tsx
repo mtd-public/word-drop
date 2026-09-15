@@ -8,9 +8,10 @@ interface CellProps {
   clearing?: boolean
   bursting?: boolean
   age?: number
+  letter?: string
 }
 
-export function Cell({ color, active, clearing, bursting, age }: CellProps) {
+export function Cell({ color, active, clearing, bursting, age, letter }: CellProps) {
   if (!color) return <div className="cell" />
 
   // Blocks stay axis-aligned at all times (no rotate keyframes) so they read as
@@ -34,6 +35,7 @@ export function Cell({ color, active, clearing, bursting, age }: CellProps) {
       animate={animate}
       transition={transition}
     >
+      {letter && <span className="cell__letter">{letter}</span>}
       {typeof age === 'number' && age > 0 && <span className="cell__age">{age}</span>}
     </motion.div>
   )
