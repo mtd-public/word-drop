@@ -1,6 +1,7 @@
 import { Board } from './components/Board'
 import { Controls } from './components/Controls'
 import { GameOverlay } from './components/GameOverlay'
+import { KeyboardHelp } from './components/KeyboardHelp'
 import { Sidebar } from './components/Sidebar'
 import { useGameEngine } from './game/useGameEngine'
 
@@ -20,14 +21,17 @@ export default function App() {
             <span className="stat__label">Lines</span> {state.lines}
           </span>
         </div>
-        <button
-          type="button"
-          className="btn btn--ghost"
-          onClick={togglePause}
-          disabled={state.phase !== 'playing' && state.phase !== 'paused'}
-        >
-          {state.phase === 'paused' ? 'Resume' : 'Pause'}
-        </button>
+        <div className="topbar__actions">
+          <KeyboardHelp />
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={togglePause}
+            disabled={state.phase !== 'playing' && state.phase !== 'paused'}
+          >
+            {state.phase === 'paused' ? 'Resume' : 'Pause'}
+          </button>
+        </div>
       </header>
 
       <main className="layout">
