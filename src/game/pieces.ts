@@ -12,11 +12,15 @@ export const SHAPES: Record<PieceType, Array<Array<[number, number]>>> = {
     [[2, 3], [2, 2], [2, 1], [2, 0]],
     [[3, 1], [2, 1], [1, 1], [0, 1]],
   ],
+  // O keeps the same 2x2 footprint at every rotation (as it must), but the 4
+  // block indices still cycle through it — so the letters/colors carried by
+  // each block visibly rotate through all 4 corners instead of rotate being
+  // a total no-op.
   O: [
     [[0, 1], [0, 2], [1, 1], [1, 2]],
-    [[0, 1], [0, 2], [1, 1], [1, 2]],
-    [[0, 1], [0, 2], [1, 1], [1, 2]],
-    [[0, 1], [0, 2], [1, 1], [1, 2]],
+    [[0, 2], [1, 2], [0, 1], [1, 1]],
+    [[1, 2], [1, 1], [0, 2], [0, 1]],
+    [[1, 1], [0, 1], [1, 2], [0, 2]],
   ],
   T: [
     [[0, 1], [1, 0], [1, 1], [1, 2]],
