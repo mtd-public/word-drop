@@ -8,7 +8,7 @@ export const BOARD_ROWS = 20
 /** A placed cell self-destructs this many turns (piece locks) after landing. */
 export const LIFESPAN_BY_COLOR: Record<PieceColor, number> = {
   red: 5,
-  blue: 6,
+  blue: 10,
 }
 
 export interface FilledCell {
