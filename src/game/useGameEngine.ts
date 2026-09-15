@@ -83,7 +83,23 @@ function lockActivePiece(state: GameState): GameState {
   const clearableRows = findMonochromeFullRows(aged)
 
   if (expiredCells.length > 0 || clearableRows.length > 0) {
-    return { ...state, grid: aged, clearingRows: clearableRows, destructingCells: expiredCells, phase: 'clearing' }
+    // Score counts the instant a match locks in — the flash/burst that follows
+    // is purely visual, not a gate on when points land.
+    const clearedCount = clearableRows.length
+    const lines = state.lines + clearedCount
+    const level = levelForLines(lines)
+    const score = state.score + pointsForClear(clearedCount, state.level)
+    return {
+      ...state,
+      grid: aged,
+      clearingRows: clearableRows,
+      destructingCells: expiredCells,
+      phase: 'clearing',
+      lines,
+      level,
+      score,
+      dropIntervalMs: dropIntervalForLevel(level),
+    }
   }
 
   // Nothing to clear or destruct — but pieces can still overhang gaps, so settle now.
@@ -139,22 +155,13 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'RESOLVE_CLEAR': {
       if (state.phase !== 'clearing') return state
-      const clearedCount = state.clearingRows.length
       const grid = resolveRemovals(state.grid, state.clearingRows, state.destructingCells)
-      const lines = state.lines + clearedCount
-      const level = levelForLines(lines)
-      const score = state.score + pointsForClear(clearedCount, state.level)
-      const next = trySpawnNext({
+      return trySpawnNext({
         ...state,
         grid,
-        lines,
-        level,
-        score,
         clearingRows: [],
         destructingCells: [],
-        dropIntervalMs: dropIntervalForLevel(level),
       })
-      return next
     }
 
     case 'NEW_GAME':
