@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 const SHORTCUTS: Array<{ keys: string[]; label: string }> = [
   { keys: ['←'], label: 'Move left' },
   { keys: ['→'], label: 'Move right' },
-  { keys: ['↑', 'X'], label: 'Swap piece orientation' },
-  { keys: ['Space'], label: 'Fast drop' },
-  { keys: ['↓'], label: 'Soft drop' },
+  { keys: ['↑', 'X'], label: 'Rotate' },
+  { keys: ['↓', 'Space'], label: 'Drop' },
   { keys: ['P'], label: 'Pause / resume' },
 ]
 

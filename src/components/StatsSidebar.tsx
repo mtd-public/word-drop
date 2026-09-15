@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import type { GameState } from '../game/types'
-import { NextPiece } from './NextPiece'
 
 function Stat({ label, value, duplicate }: { label: string; value: number; duplicate?: boolean }) {
   return (
@@ -20,21 +19,19 @@ function Stat({ label, value, duplicate }: { label: string; value: number; dupli
 }
 
 export function StatsSidebar({ state }: { state: GameState }) {
-  const upcoming = state.nextQueue[0]
-
   return (
     <aside className="stats-sidebar">
       <div className="stats-sidebar__section">
         <span className="stat__label">Next</span>
-        {upcoming && <NextPiece entry={upcoming} />}
+        <div className="next-placeholder" aria-hidden="true" />
       </div>
       <div className="stats-sidebar__stats">
-        {/* Score and Words already show in the topbar — hidden here on the
-            compact phone/tablet-portrait strip, shown alongside Level on
-            the wide (desktop/tablet-landscape) card. */}
+        {/* Score already shows in the topbar — hidden here on the compact
+            phone/tablet-portrait strip, shown alongside Level on the wide
+            (desktop/tablet-landscape) card. */}
         <Stat label="Score" value={state.score} duplicate />
         <Stat label="Level" value={state.level} />
-        <Stat label="Words" value={state.words} duplicate />
+        <Stat label="Bonus" value={state.bonus} />
       </div>
     </aside>
   )
