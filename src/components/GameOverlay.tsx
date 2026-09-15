@@ -31,8 +31,8 @@ export function GameOverlay({ phase, score, onStart, onResume, onNewGame }: Game
           >
             {phase === 'ready' && (
               <>
-                <h2>Word Drop</h2>
-                <p>Clear lines, chase the high score.</p>
+                <h2>Game Template</h2>
+                <p>A starting shell for your next game.</p>
                 <button type="button" className="btn btn--primary" onClick={onStart}>
                   Start game
                 </button>
