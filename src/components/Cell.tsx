@@ -6,26 +6,33 @@ interface CellProps {
   color: PieceColor | null
   active?: boolean
   clearing?: boolean
+  bursting?: boolean
+  age?: number
 }
 
-export function Cell({ color, active, clearing }: CellProps) {
+export function Cell({ color, active, clearing, bursting, age }: CellProps) {
   if (!color) return <div className="cell" />
+
+  const animate = bursting
+    ? { opacity: [1, 1, 0], scale: [1, 1.3, 0.3], rotate: [0, 10, -12] }
+    : clearing
+      ? { opacity: [1, 0.25, 1, 0.25, 1], scale: [1, 1.12, 1] }
+      : { opacity: 1, scale: 1, y: 0 }
+
+  const transition =
+    bursting || clearing
+      ? { duration: 0.38, ease: 'easeInOut' as const }
+      : { type: 'spring' as const, stiffness: 500, damping: 30 }
 
   return (
     <motion.div
       className={`cell cell--filled${active ? ' cell--active' : ''}`}
       style={{ background: PIECE_COLOR_HEX[color] }}
-      initial={active ? { opacity: 0, scale: 0.6 } : false}
-      animate={
-        clearing
-          ? { opacity: [1, 0.25, 1, 0.25, 1], scale: [1, 1.12, 1] }
-          : { opacity: 1, scale: 1 }
-      }
-      transition={
-        clearing
-          ? { duration: 0.38, ease: 'easeInOut' }
-          : { type: 'spring', stiffness: 500, damping: 30 }
-      }
-    />
+      initial={{ opacity: 0, scale: active ? 0.6 : 0.82, y: active ? 0 : -8 }}
+      animate={animate}
+      transition={transition}
+    >
+      {typeof age === 'number' && age > 0 && <span className="cell__age">{age}</span>}
+    </motion.div>
   )
 }

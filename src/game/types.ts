@@ -7,7 +7,16 @@ export type PieceColor = 'red' | 'blue'
 export const BOARD_COLS = 10
 export const BOARD_ROWS = 20
 
-export type Cell = PieceColor | null
+/** A placed red cell self-destructs this many turns (piece locks) after landing. */
+export const RED_LIFESPAN = 3
+
+export interface FilledCell {
+  color: PieceColor
+  /** Turns remaining before self-destruct. Only meaningful for red cells. */
+  age: number
+}
+
+export type Cell = FilledCell | null
 export type Grid = Cell[][]
 
 export interface QueueEntry {
@@ -34,5 +43,6 @@ export interface GameState {
   lines: number
   phase: GamePhase
   clearingRows: number[]
+  destructingCells: Array<[number, number]>
   dropIntervalMs: number
 }

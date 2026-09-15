@@ -1,6 +1,6 @@
 import { cellsFor, splitColorMap } from './pieces'
-import { BOARD_COLS, BOARD_ROWS } from './types'
-import type { ActivePiece, Grid } from './types'
+import { BOARD_COLS, BOARD_ROWS, RED_LIFESPAN } from './types'
+import type { ActivePiece, Cell, FilledCell, Grid } from './types'
 
 export function createEmptyGrid(): Grid {
   return Array.from({ length: BOARD_ROWS }, () => Array<null>(BOARD_COLS).fill(null))
@@ -24,27 +24,67 @@ export function mergePiece(grid: Grid, piece: ActivePiece): Grid {
     const row = piece.row + dr
     const col = piece.col + dc
     if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
-      next[row][col] = colors[`${dr}-${dc}`]
+      const color = colors[`${dr}-${dc}`]
+      next[row][col] = { color, age: color === 'red' ? RED_LIFESPAN : 0 }
     }
   }
   return next
+}
+
+/** Ages every placed red cell by one turn, except cells at `skip` coordinates (just placed). */
+export function ageRedCells(grid: Grid, skip: Set<string>): Grid {
+  return grid.map((row, r) =>
+    row.map((cell, c) => {
+      if (!cell || cell.color !== 'red' || skip.has(`${r}-${c}`)) return cell
+      return { ...cell, age: cell.age - 1 }
+    }),
+  )
+}
+
+export function findExpiredRedCells(grid: Grid): Array<[number, number]> {
+  const cells: Array<[number, number]> = []
+  grid.forEach((row, r) => {
+    row.forEach((cell, c) => {
+      if (cell && cell.color === 'red' && cell.age <= 0) cells.push([r, c])
+    })
+  })
+  return cells
 }
 
 /** Only a full row where every cell is the same color is clearable. */
 export function findMonochromeFullRows(grid: Grid): number[] {
   const rows: number[] = []
   grid.forEach((row, index) => {
-    const full = row.every((cell) => cell !== null)
-    const monochrome = full && row.every((cell) => cell === row[0])
-    if (full && monochrome) rows.push(index)
+    const filled = row as FilledCell[]
+    if (filled.some((cell) => cell === null)) return
+    const first = filled[0].color
+    if (filled.every((cell) => cell.color === first)) rows.push(index)
   })
   return rows
 }
 
-export function clearRows(grid: Grid, rows: number[]): Grid {
-  if (rows.length === 0) return grid
-  const rowSet = new Set(rows)
-  const remaining = grid.filter((_, index) => !rowSet.has(index))
-  const cleared = Array.from({ length: rows.length }, () => Array<null>(BOARD_COLS).fill(null))
-  return [...cleared, ...remaining]
+/** Drops every column's cells down to close any gaps, keeping their relative order. */
+export function settleColumns(grid: Grid): Grid {
+  const settled = createEmptyGrid()
+  for (let col = 0; col < BOARD_COLS; col++) {
+    const filled: Cell[] = []
+    for (let row = 0; row < BOARD_ROWS; row++) {
+      if (grid[row][col] !== null) filled.push(grid[row][col])
+    }
+    const startRow = BOARD_ROWS - filled.length
+    filled.forEach((cell, i) => {
+      settled[startRow + i][col] = cell
+    })
+  }
+  return settled
+}
+
+/** Removes cleared rows and self-destructed cells, then lets everything above settle. */
+export function resolveRemovals(grid: Grid, rows: number[], cells: Array<[number, number]>): Grid {
+  const next = grid.map((row) => [...row])
+  for (const row of rows) {
+    for (let c = 0; c < BOARD_COLS; c++) next[row][c] = null
+  }
+  for (const [r, c] of cells) next[r][c] = null
+  return settleColumns(next)
 }
