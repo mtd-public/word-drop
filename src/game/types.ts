@@ -5,12 +5,15 @@ export type PieceColor = 'red' | 'blue'
 export const BOARD_COLS = 10
 export const BOARD_ROWS = 20
 
-/** A placed red cell self-destructs this many turns (piece locks) after landing. */
-export const RED_LIFESPAN = 3
+/** A placed cell self-destructs this many turns (piece locks) after landing. */
+export const LIFESPAN_BY_COLOR: Record<PieceColor, number> = {
+  red: 5,
+  blue: 6,
+}
 
 export interface FilledCell {
   color: PieceColor
-  /** Turns remaining before self-destruct. Only meaningful for red cells. */
+  /** Turns remaining before self-destruct. */
   age: number
   /** A vowel for red cells, a consonant for blue cells. */
   letter: string
@@ -35,15 +38,26 @@ export interface ActivePiece {
 
 export type GamePhase = 'ready' | 'playing' | 'paused' | 'clearing' | 'over'
 
+export interface WordMatch {
+  word: string
+  cells: Array<[number, number]>
+}
+
+export interface FoundWord {
+  word: string
+  points: number
+}
+
 export interface GameState {
   grid: Grid
   active: ActivePiece
   nextQueue: QueueEntry[]
   score: number
   level: number
-  lines: number
+  words: number
   phase: GamePhase
-  clearingRows: number[]
+  wordMatches: WordMatch[]
+  wordHistory: FoundWord[]
   destructingCells: Array<[number, number]>
   dropIntervalMs: number
 }

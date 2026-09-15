@@ -286,6 +286,55 @@ button {
   display: inline-block;
 }
 
+.history {
+  flex: 1;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history__empty {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.history__table {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.history__table tr {
+  border-bottom: 1px solid var(--line);
+}
+
+.history__table tr:last-child {
+  border-bottom: none;
+}
+
+.history__word,
+.history__points {
+  padding: 5px 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.history__word {
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+
+.history__points {
+  text-align: right;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
 .next-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -381,6 +430,33 @@ button {
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   background: var(--panel);
   border-top: 1px solid var(--line);
+}
+
+/* ---------- Word toast ---------- */
+.word-toast {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+.word-toast__pill {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px -4px rgba(20, 22, 30, 0.45);
 }
 
 /* ---------- Overlay ---------- */

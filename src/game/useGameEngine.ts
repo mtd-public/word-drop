@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import {
-  ageRedCells,
+  ageCells,
   createEmptyGrid,
-  findExpiredRedCells,
-  findFullRows,
+  findExpiredCells,
   isValidPosition,
   mergePiece,
   resolveRemovals,
   settleColumns,
 } from './board'
 import { cellsFor, randomLettersFor, shuffledBag } from './pieces'
-import { dropIntervalForLevel, levelForLines, pointsForClear } from './scoring'
+import { dropIntervalForLevel, levelForWords, pointsForWord } from './scoring'
+import { findWordMatches } from './words'
 import type { ActivePiece, GameState, QueueEntry } from './types'
 
 const SPAWN_COL = 3
@@ -39,9 +39,10 @@ function initialState(): GameState {
     nextQueue: rest,
     score: 0,
     level: 1,
-    lines: 0,
+    words: 0,
     phase: 'ready',
-    clearingRows: [],
+    wordMatches: [],
+    wordHistory: [],
     destructingCells: [],
     dropIntervalMs: dropIntervalForLevel(1),
   }
@@ -78,26 +79,27 @@ function lockActivePiece(state: GameState): GameState {
       ([dr, dc]) => `${state.active.row + dr}-${state.active.col + dc}`,
     ),
   )
-  const aged = ageRedCells(merged, justPlaced)
-  const expiredCells = findExpiredRedCells(aged)
-  const clearableRows = findFullRows(aged)
+  const aged = ageCells(merged, justPlaced)
+  const expiredCells = findExpiredCells(aged)
+  const wordMatches = findWordMatches(aged)
 
-  if (expiredCells.length > 0 || clearableRows.length > 0) {
+  if (expiredCells.length > 0 || wordMatches.length > 0) {
     // Score counts the instant a match locks in — the flash/burst that follows
     // is purely visual, not a gate on when points land.
-    const clearedCount = clearableRows.length
-    const lines = state.lines + clearedCount
-    const level = levelForLines(lines)
-    const score = state.score + pointsForClear(clearedCount, state.level)
+    const words = state.words + wordMatches.length
+    const level = levelForWords(words)
+    const found = wordMatches.map((m) => ({ word: m.word, points: pointsForWord(m.word, state.level) }))
+    const scoreGain = found.reduce((sum, f) => sum + f.points, 0)
     return {
       ...state,
       grid: aged,
-      clearingRows: clearableRows,
+      wordMatches,
+      wordHistory: [...found.reverse(), ...state.wordHistory],
       destructingCells: expiredCells,
       phase: 'clearing',
-      lines,
+      words,
       level,
-      score,
+      score: state.score + scoreGain,
       dropIntervalMs: dropIntervalForLevel(level),
     }
   }
@@ -155,11 +157,12 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'RESOLVE_CLEAR': {
       if (state.phase !== 'clearing') return state
-      const grid = resolveRemovals(state.grid, state.clearingRows, state.destructingCells)
+      const matchedCells = state.wordMatches.flatMap((m) => m.cells)
+      const grid = resolveRemovals(state.grid, [...matchedCells, ...state.destructingCells])
       return trySpawnNext({
         ...state,
         grid,
-        clearingRows: [],
+        wordMatches: [],
         destructingCells: [],
       })
     }
@@ -184,12 +187,12 @@ export function useGameEngine() {
     return () => window.clearInterval(id)
   }, [state.phase, state.dropIntervalMs])
 
-  // Row-clear flash plays first, then the rows actually collapse.
+  // Match flash/burst plays first, then the matched cells actually collapse.
   useEffect(() => {
     if (state.phase !== 'clearing') return
     const id = window.setTimeout(() => dispatch({ type: 'RESOLVE_CLEAR' }), CLEAR_ANIMATION_MS)
     return () => window.clearTimeout(id)
-  }, [state.phase, state.clearingRows])
+  }, [state.phase, state.wordMatches])
 
   const moveLeft = useCallback(() => dispatch({ type: 'MOVE', dir: -1 }), [])
   const moveRight = useCallback(() => dispatch({ type: 'MOVE', dir: 1 }), [])
